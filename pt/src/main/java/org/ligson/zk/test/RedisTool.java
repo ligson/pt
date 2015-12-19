@@ -55,7 +55,7 @@ public class RedisTool {
 		infos.add(shardInfo);
 		ShardedJedis shardedJedis = new ShardedJedis(infos);
 		System.out.println(shardedJedis);
-		String key = "user_service_ALL_18910446909_20151208";
+		String key = "user_service_ALL_15630589137_20151219";
 		//createKeyForValidCode();
 		//shardedJedis.getKeyTag(key)
 		long r = shardedJedis.del(key);

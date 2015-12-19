@@ -10,6 +10,7 @@ public class ZkTools {
 		ZkClient zkClient = new ZkClient("10.0.0.251:2181", 300000, 5000);
 		System.out.println(zkClient);
 		String accountApiRoot = "/dubbo/com.sankai.user.api.account.AccountApi/providers";
+		String validcodeApiRoot = "/dubbo/com.sankai.user.api.validcode.ValidCodeApi/providers";
 		List<String> subList = zkClient.getChildren(accountApiRoot);
 		for (String sub : subList) {
 			System.out.println(sub);
