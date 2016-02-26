@@ -13,12 +13,13 @@ public class ZkTools {
 		String accountApiRoot = "/dubbo/com.sankai.pay.api.PayApi/providers";
 		String validcodeApiRoot = "/dubbo/com.sankai.user.api.validcode.ValidCodeApi/providers";
 		List<String> subList = zkClient.getChildren(accountApiRoot);
+		System.out.println(subList.size()+"================");
 		for (String sub : subList) {
-			System.out.println(sub);
+			System.out.println("---->?"+sub);
 			if (!sub.contains("10.0.0.252")) {
 				
 				String path = accountApiRoot+"/"+sub;
-				System.out.println(sub);
+				System.out.println(path);
 				//boolean b = zkClient.delete(path);
 				//System.out.println("delete "+path+" :"+b);
 			}
