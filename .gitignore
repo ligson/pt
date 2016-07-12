@@ -4,3 +4,5 @@ logs/
 .project
 .classpath
 /1.log
+*.iml
+.idea/
