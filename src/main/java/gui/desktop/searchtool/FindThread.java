@@ -34,7 +34,8 @@ public class FindThread {
 		FullTextSearchService searchService = FullTextSearchService
 				.getInstance(searchToolRoot);
 		//System.out.println(searchService.hotKey("qq", 100));;
-		List<File> key =  searchService.search("qq",100);
+		List<File> key =  searchService.search("cmd",100);
+		System.out.println(key);
 	}
 	public static void main(String[] args) throws Exception{
 		search();

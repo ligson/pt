@@ -26,11 +26,14 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.spell.PlainTextDictionary;
 import org.apache.lucene.search.spell.SpellChecker;
@@ -53,6 +56,7 @@ public class FullTextSearchService {
 	private File spellcheckDic;
 	private SpellChecker spellChecker;
 	private static FullTextSearchService instance;
+	
 
 	public synchronized static FullTextSearchService getInstance(File indexDir) {
 		if (instance == null) {
@@ -63,7 +67,7 @@ public class FullTextSearchService {
 
 	private FullTextSearchService(File indexDir) {
 		this.indexDir = indexDir;
-		if(!indexDir.exists()){
+		if (!indexDir.exists()) {
 			indexDir.mkdirs();
 		}
 		init();
@@ -84,8 +88,8 @@ public class FullTextSearchService {
 			reader = DirectoryReader.open(writer, true);
 
 			// 拼写
-			if((spellcheckDic==null)||(spellcheckDic!=null&&!spellcheckDic.exists())){
-				spellcheckDic = new File(indexDir,"spelldic.txt");
+			if ((spellcheckDic == null) || (spellcheckDic != null && !spellcheckDic.exists())) {
+				spellcheckDic = new File(indexDir, "spelldic.txt");
 				spellcheckDic.createNewFile();
 			}
 			File spellCheckerIndex = new File(indexDir, "spellchecker");
@@ -112,19 +116,19 @@ public class FullTextSearchService {
 	}
 
 	private void addSpell(List<String> names) {
-		
+
 		SmartChineseAnalyzer smartChineseAnalyzer = (SmartChineseAnalyzer) analyzer;
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(spellcheckDic));
 			String line = null;
 			Set<String> hash = new HashSet<>();
-			while((line=reader.readLine())!=null){
+			while ((line = reader.readLine()) != null) {
 				hash.add(line);
 			}
 			reader.close();
-			
+
 			FileWriter writer = new FileWriter(spellcheckDic, true);
-			for(String name:names){
+			for (String name : names) {
 				TokenStream tokenStream = smartChineseAnalyzer.tokenStream("field", name);
 				CharTermAttribute charTermAttribute = tokenStream.addAttribute(CharTermAttribute.class);
 				tokenStream.reset();
@@ -135,12 +139,12 @@ public class FullTextSearchService {
 				tokenStream.end();
 				tokenStream.close();
 			}
-			String[] nameArr = new String[(int)hash.size()];
+			String[] nameArr = new String[(int) hash.size()];
 			nameArr = hash.toArray(nameArr);
 			Arrays.sort(nameArr);
-			
+
 			PrintWriter printWriter = new PrintWriter(writer);
-			for(String name:nameArr){
+			for (String name : nameArr) {
 				printWriter.println(name);
 			}
 			writer.close();
@@ -152,15 +156,15 @@ public class FullTextSearchService {
 			e.printStackTrace();
 		}
 	}
-	
-	public void index(List<File> files){
+
+	public void index(List<File> files) {
 		List<String> names = new ArrayList<>();
 		logger.debug("--------->>>>>>>>>>开始索引");
 		double i = 0.0;
-		for(File file:files){
+		for (File file : files) {
 			names.add(file.getName());
 			index(file);
-			logger.debug("索引进度:"+((i++)*100.00/files.size())+"%");
+			logger.debug("索引进度:" + ((i++) * 100.00 / files.size()) + "%");
 		}
 		try {
 			writer.commit();
@@ -174,7 +178,7 @@ public class FullTextSearchService {
 	private void index(File file) {
 		try {
 			writer.deleteDocuments(new Term("id", file.getAbsolutePath()));
-			//writer.commit();
+			// writer.commit();
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
@@ -194,7 +198,7 @@ public class FullTextSearchService {
 
 		try {
 			writer.addDocument(document);
-			logger.debug("增加文档:"+document);
+			logger.debug("增加文档:" + document);
 		} catch (IOException e) {
 			logger.error(e.getMessage());
 		}
@@ -229,32 +233,38 @@ public class FullTextSearchService {
 	}
 
 	public List<File> search(String key, int max) {
-		List<File>  list = new ArrayList<>();
-		QueryParser queryParser = new QueryParser("path", analyzer);
+		List<File> list = new ArrayList<>();
+		String[] fields = new String[] { "name", "path" };
+		String[] fieldValues = new String[] { key, key };
+
 		try {
-			Query query = queryParser.parse(key);
+			Query query = MultiFieldQueryParser.parse(fieldValues, fields, analyzer);
+			query = new MyCustomScoreQuery(query);
 			if (reader == null) {
 				reader = DirectoryReader.open(directory);
-            } else {
-                DirectoryReader tr = DirectoryReader.openIfChanged(reader);
-                if (tr != null) {
-                	reader.close();
-                	reader = tr;
-                }
-            }
+			} else {
+				DirectoryReader tr = DirectoryReader.openIfChanged(reader);
+				if (tr != null) {
+					reader.close();
+					reader = tr;
+				}
+			}
 			IndexSearcher searcher = new IndexSearcher(reader);
-			 TopDocs topDocs = searcher.search(query, max + 1);
-	            ScoreDoc[] scoreDocs = topDocs.scoreDocs;
-	            for (int i = 0; i < scoreDocs.length; i++) {
-	                ScoreDoc scoreDoc = scoreDocs[i];
-	                Document document = searcher.doc(scoreDoc.doc);
-	                String idString = document.get("id");
-	                list.add(new File(idString));
-	            }
+
+			Sort sort = new Sort(new SortField("name", SortField.Type.SCORE, false));
+			TopDocs topDocs = searcher.search(query, max + 1, sort);
+			ScoreDoc[] scoreDocs = topDocs.scoreDocs;
+			for (int i = 0; i < scoreDocs.length; i++) {
+				ScoreDoc scoreDoc = scoreDocs[i];
+				Document document = searcher.doc(scoreDoc.doc);
+				String idString = document.get("id");
+				list.add(new File(idString));
+				logger.debug("path:" + idString + "    score:" + scoreDoc.score);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return list;
 	}
 }
