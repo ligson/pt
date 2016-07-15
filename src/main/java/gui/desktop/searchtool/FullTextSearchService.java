@@ -20,6 +20,7 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.LongField;
+import org.apache.lucene.document.SortedDocValuesField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
@@ -39,6 +40,7 @@ import org.apache.lucene.search.spell.PlainTextDictionary;
 import org.apache.lucene.search.spell.SpellChecker;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.BytesRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -195,6 +197,8 @@ public class FullTextSearchService {
 		document.add(nameField);
 		document.add(typeField);
 		document.add(createDateField);
+		SortedDocValuesField sortedDocValuesField = new SortedDocValuesField("path", new BytesRef(file.getAbsolutePath().getBytes()));
+		document.add(sortedDocValuesField);
 
 		try {
 			writer.addDocument(document);
@@ -250,9 +254,10 @@ public class FullTextSearchService {
 				}
 			}
 			IndexSearcher searcher = new IndexSearcher(reader);
-
+			//searcher.setDefaultFieldSortScoring(true, false);
+			
 			Sort sort = new Sort(new SortField("name", SortField.Type.SCORE, false));
-			TopDocs topDocs = searcher.search(query, max + 1, sort);
+			TopDocs topDocs = searcher.search(query, max + 1, sort,true,false);
 			ScoreDoc[] scoreDocs = topDocs.scoreDocs;
 			for (int i = 0; i < scoreDocs.length; i++) {
 				ScoreDoc scoreDoc = scoreDocs[i];

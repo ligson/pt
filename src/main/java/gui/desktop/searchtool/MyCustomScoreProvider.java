@@ -8,14 +8,17 @@ import java.util.Map;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.SortedDocValues;
 import org.apache.lucene.queries.CustomScoreProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MyCustomScoreProvider extends CustomScoreProvider {
+	private static Logger logger = LoggerFactory.getLogger(MyCustomScoreProvider.class);
 	private static Map<String, Float> suffixScoreMap = new HashMap<>();
 	static {
-		suffixScoreMap.put("exe", 0.9f);
-		suffixScoreMap.put("cmd", 0.8f);
-		suffixScoreMap.put("bat", 0.7f);
-		suffixScoreMap.put("msc", 0.6f);
+		suffixScoreMap.put("exe", 9f);
+		suffixScoreMap.put("cmd", 8f);
+		suffixScoreMap.put("bat", 7f);
+		suffixScoreMap.put("msc", 6f);
 	}
 
 	private SortedDocValues pathValues;
@@ -39,23 +42,23 @@ public class MyCustomScoreProvider extends CustomScoreProvider {
 	 */
 	@Override
 	public float customScore(int doc, float subQueryScore, float valSrcScore) throws IOException {
-		System.out.println("------------------");
 		float boost = subQueryScore * valSrcScore;
-		if((pathValues==null)||(pathValues.get(doc)==null)){
-			System.out.println("===="+boost);
+		if ((pathValues == null) || (pathValues.get(doc) == null)) {
 			return boost;
 		}
-		
-		File file = new File(pathValues.get(doc).utf8ToString());
-		System.out.println("===="+file.getAbsolutePath());
-		if (file.isFile()) {
-			boost += 1.0f;
-			int idx = file.getName().lastIndexOf('.');
-			Float score = suffixScoreMap.get(file.getName().substring(idx));
-			if (score != null) {
-				boost += score;
-			}
 
+		File file = new File(pathValues.get(doc).utf8ToString());
+		if (file.isFile()) {
+			//boost += 10f;
+			int idx = file.getName().lastIndexOf('.');
+			if (idx > 0) {
+				String suffix = file.getName().substring(idx+1);
+				Float score = suffixScoreMap.get(suffix);
+				if (score != null) {
+					boost += score;
+					logger.debug("后缀:" + suffix + "(" + file.getAbsolutePath() + ")评分" + boost);
+				}
+			}
 		}
 		return boost;
 
