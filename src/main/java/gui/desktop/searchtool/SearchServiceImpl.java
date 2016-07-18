@@ -44,31 +44,26 @@ import org.apache.lucene.util.BytesRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gui.desktop.searchtool.model.PageModel;
+import gui.desktop.searchtool.service.SearchService;
+
 /**
  * Created by ligson on 2015/7/23.
  */
-public class FullTextSearchService {
+public class SearchServiceImpl implements SearchService {
 	private IndexWriter writer;
 	private DirectoryReader reader;
 	private File indexDir;
 	private Analyzer analyzer = new SmartChineseAnalyzer();
 	private Directory directory;
-	private Logger logger = LoggerFactory.getLogger(FullTextSearchService.class);
+	private Logger logger = LoggerFactory.getLogger(SearchServiceImpl.class);
 	private Directory spellcheckerDirectory;
 	private File spellcheckDic;
 	private SpellChecker spellChecker;
-	private static FullTextSearchService instance;
-	
+	public static final File searchToolRoot = new File(System.getProperty("user.home") + "/.searchtool");
 
-	public synchronized static FullTextSearchService getInstance(File indexDir) {
-		if (instance == null) {
-			instance = new FullTextSearchService(indexDir);
-		}
-		return instance;
-	}
-
-	private FullTextSearchService(File indexDir) {
-		this.indexDir = indexDir;
+	public SearchServiceImpl() {
+		this.indexDir = searchToolRoot;
 		if (!indexDir.exists()) {
 			indexDir.mkdirs();
 		}
@@ -159,6 +154,7 @@ public class FullTextSearchService {
 		}
 	}
 
+	@Override
 	public void index(List<File> files) {
 		List<String> names = new ArrayList<>();
 		logger.debug("--------->>>>>>>>>>开始索引");
@@ -197,7 +193,8 @@ public class FullTextSearchService {
 		document.add(nameField);
 		document.add(typeField);
 		document.add(createDateField);
-		SortedDocValuesField sortedDocValuesField = new SortedDocValuesField("path", new BytesRef(file.getAbsolutePath().getBytes()));
+		SortedDocValuesField sortedDocValuesField = new SortedDocValuesField("path",
+				new BytesRef(file.getAbsolutePath().getBytes()));
 		document.add(sortedDocValuesField);
 
 		try {
@@ -237,9 +234,17 @@ public class FullTextSearchService {
 	}
 
 	public List<File> search(String key, int max) {
+		return null;
+	}
+
+	@Override
+	public PageModel<File> search(String key, int offset, int max) {
+		//特殊符号 + - && || ! ( ) { } [ ] ^ " ~ * ? : 
+		key = QueryParser.escape(key);
 		List<File> list = new ArrayList<>();
 		String[] fields = new String[] { "name", "path" };
 		String[] fieldValues = new String[] { key, key };
+		PageModel<File> pageModel = new PageModel<>();
 
 		try {
 			Query query = MultiFieldQueryParser.parse(fieldValues, fields, analyzer);
@@ -254,22 +259,31 @@ public class FullTextSearchService {
 				}
 			}
 			IndexSearcher searcher = new IndexSearcher(reader);
-			//searcher.setDefaultFieldSortScoring(true, false);
-			
+			// searcher.setDefaultFieldSortScoring(true, false);
+
 			Sort sort = new Sort(new SortField("name", SortField.Type.SCORE, false));
-			TopDocs topDocs = searcher.search(query, max + 1, sort,true,false);
+			TopDocs topDocs = searcher.search(query, Integer.MAX_VALUE, sort, true, false);
 			ScoreDoc[] scoreDocs = topDocs.scoreDocs;
-			for (int i = 0; i < scoreDocs.length; i++) {
-				ScoreDoc scoreDoc = scoreDocs[i];
-				Document document = searcher.doc(scoreDoc.doc);
-				String idString = document.get("id");
-				list.add(new File(idString));
-				logger.debug("path:" + idString + "    score:" + scoreDoc.score);
+			pageModel.setTotal(topDocs.totalHits);
+			pageModel.setOffset(offset);
+			pageModel.setMax(max);
+			int totalPage = (int) Math.ceil(pageModel.getTotal() * 1.0 / max);
+			pageModel.setTotalPage(totalPage);
+			pageModel.setPage(offset / max + 1);
+			int endIdx = (offset + max) < (scoreDocs.length - 1) ? (offset + max) : (scoreDocs.length - 1);
+			if (pageModel.getTotal() > 0) {
+				for (int i = offset; i < endIdx; i++) {
+					ScoreDoc scoreDoc = scoreDocs[i];
+					Document document = searcher.doc(scoreDoc.doc);
+					String idString = document.get("id");
+					list.add(new File(idString));
+					logger.debug("path:" + idString + "    score:" + scoreDoc.score);
+				}
 			}
+			pageModel.setDatas(list);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		return list;
+		return pageModel;
 	}
 }

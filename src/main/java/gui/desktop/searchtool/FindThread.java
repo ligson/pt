@@ -25,19 +25,12 @@ public class FindThread {
 			thread.join();
 		}
 
-		FullTextSearchService searchService = FullTextSearchService
-				.getInstance(searchToolRoot);
-		searchService.index(pathList);
+		//searchService.index(pathList);
 	}
 	
 	public static void search(){
-		FullTextSearchService searchService = FullTextSearchService
-				.getInstance(searchToolRoot);
-		//System.out.println(searchService.hotKey("qq", 100));;
-		List<File> key =  searchService.search("qq",100);
-		for(int i = 0;i<key.size();i++ ){
-			System.out.println(i+"=="+key.get(i));
-		}
+		
+
 	}
 	public static void main(String[] args) throws Exception{
 		search();

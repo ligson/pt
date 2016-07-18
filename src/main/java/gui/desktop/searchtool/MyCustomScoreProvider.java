@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 public class MyCustomScoreProvider extends CustomScoreProvider {
 	private static Logger logger = LoggerFactory.getLogger(MyCustomScoreProvider.class);
+	private static boolean enabled = false;
 	private static Map<String, Float> suffixScoreMap = new HashMap<>();
 	static {
 		suffixScoreMap.put("exe", 9f);
@@ -43,16 +44,19 @@ public class MyCustomScoreProvider extends CustomScoreProvider {
 	@Override
 	public float customScore(int doc, float subQueryScore, float valSrcScore) throws IOException {
 		float boost = subQueryScore * valSrcScore;
+		if (!enabled) {
+			return boost;
+		}
 		if ((pathValues == null) || (pathValues.get(doc) == null)) {
 			return boost;
 		}
 
 		File file = new File(pathValues.get(doc).utf8ToString());
 		if (file.isFile()) {
-			//boost += 10f;
+			// boost += 10f;
 			int idx = file.getName().lastIndexOf('.');
 			if (idx > 0) {
-				String suffix = file.getName().substring(idx+1);
+				String suffix = file.getName().substring(idx + 1);
 				Float score = suffixScoreMap.get(suffix);
 				if (score != null) {
 					boost += score;
