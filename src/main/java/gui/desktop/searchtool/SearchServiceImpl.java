@@ -239,6 +239,7 @@ public class SearchServiceImpl implements SearchService {
 
 	@Override
 	public PageModel<File> search(String key, int offset, int max) {
+		offset = offset<0?0:offset;
 		//特殊符号 + - && || ! ( ) { } [ ] ^ " ~ * ? : 
 		key = QueryParser.escape(key);
 		List<File> list = new ArrayList<>();

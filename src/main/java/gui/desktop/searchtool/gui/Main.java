@@ -17,24 +17,55 @@ import javax.swing.event.DocumentListener;
 import org.apache.commons.collections.CollectionUtils;
 
 import gui.desktop.searchtool.SearchServiceImpl;
+import gui.desktop.searchtool.gui.listener.KeyboardHook;
 import gui.desktop.searchtool.model.PageModel;
 import gui.desktop.searchtool.service.SearchService;
 
 public class Main extends JFrame {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 341162064964310681L;
 	private JTextField searchBox = new JTextField();
 	private JList<File> jList = new JList<>();
 	private static SearchService searchService = new SearchServiceImpl();
+	private static int offset = 0;
+	private KeyboardHook hook = new KeyboardHook(this);
 
-	private void textChange(String key) {
+	private void textChange() {
+		String key = searchBox.getText().trim();
 		if (key != "\n" && key != "\r" && key.length() != 0) {
-			PageModel<File> pageModel = searchService.search(key, 0, 10);
+			offset = offset < 0 ? 0 : offset;
+			PageModel<File> pageModel = searchService.search(key, offset, 10);
 			if (pageModel.getTotal() > 0 && CollectionUtils.isNotEmpty(pageModel.getDatas())) {
 				jList.setListData(pageModel.getDatas().toArray(new File[pageModel.getDatas().size()]));
 				jList.setSelectedIndex(0);
-				// jList.requestFocus();
-				// setSize(getWidth(), searchBox.getHeight()+jList.getHeight());
 			}
 		}
+	}
+
+	public JTextField getSearchBox() {
+		return searchBox;
+	}
+
+	public void setSearchBox(JTextField searchBox) {
+		this.searchBox = searchBox;
+	}
+
+	public JList<File> getjList() {
+		return jList;
+	}
+
+	public void setjList(JList<File> jList) {
+		this.jList = jList;
+	}
+
+	public KeyboardHook getHook() {
+		return hook;
+	}
+
+	public void setHook(KeyboardHook hook) {
+		this.hook = hook;
 	}
 
 	public Main() {
@@ -47,17 +78,20 @@ public class Main extends JFrame {
 
 			@Override
 			public void removeUpdate(DocumentEvent e) {
-				textChange(searchBox.getText().trim());
+				offset = 0;
+				textChange();
 			}
 
 			@Override
 			public void insertUpdate(DocumentEvent e) {
-				textChange(searchBox.getText().trim());
+				offset = 0;
+				textChange();
 			}
 
 			@Override
 			public void changedUpdate(DocumentEvent e) {
-				textChange(searchBox.getText().trim());
+				offset = 0;
+				textChange();
 			}
 		});
 		searchBox.addKeyListener(new KeyListener() {
@@ -73,6 +107,12 @@ public class Main extends JFrame {
 					jList.setSelectedIndex(jList.getSelectedIndex() - 1);
 				} else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
 					jList.setSelectedIndex(jList.getSelectedIndex() + 1);
+				} else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+					offset -= 10;
+					textChange();
+				} else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+					offset += 10;
+					textChange();
 				}
 			}
 
@@ -87,16 +127,30 @@ public class Main extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				File file = jList.getSelectedValue();
 				try {
-					Process process = Runtime.getRuntime().exec("cmd /c start "+file.getAbsolutePath());
+					Runtime.getRuntime().exec("cmd /c start " + file.getAbsolutePath());
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
 			}
 		});
+
+		Thread thread = new Thread(getHook());
+		thread.start();
 	}
 
-	public static void main(String[] args) {
-		Main main = new Main();
+	public void triggerVisible() {
+		if (isVisible()) {
+			setVisible(false);
+		} else {
+			setVisible(true);
+		}
+	}
+
+	public static void main(String[] args) throws Exception {
+		final Main main = new Main();
 		main.setVisible(true);
+		SysTray sysTray = new SysTray(main);
+		sysTray.init();
+
 	}
 }
