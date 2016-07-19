@@ -13,7 +13,7 @@ import com.sun.jna.platform.win32.WinUser.KBDLLHOOKSTRUCT;
 import com.sun.jna.platform.win32.WinUser.LowLevelKeyboardProc;
 import com.sun.jna.platform.win32.WinUser.MSG;
 
-import gui.desktop.searchtool.gui.Main;
+import gui.desktop.searchtool.gui.MainWin;
 
 public class KeyboardHook implements Runnable {
 	private static HHOOK hhk;
@@ -22,18 +22,18 @@ public class KeyboardHook implements Runnable {
 	private boolean enable = true;
 	private static Long lastClick = null;
 	private static int clickNum = 0;
-	private Main main;
+	private MainWin main;
 
-	public KeyboardHook(Main main) {
+	public KeyboardHook(MainWin main) {
 		super();
 		this.main = main;
 	}
 
-	public Main getMain() {
+	public MainWin getMain() {
 		return main;
 	}
 
-	public void setMain(Main main) {
+	public void setMain(MainWin main) {
 		this.main = main;
 	}
 

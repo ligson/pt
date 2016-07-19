@@ -22,19 +22,19 @@ public class SearchBox extends JTextField implements ActionListener, DocumentLis
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private Main main;
+	private MainWin main;
 	private static int offset = 0;
 	private static SearchService searchService = new SearchServiceImpl();
 
-	public Main getMain() {
+	public MainWin getMainWin() {
 		return main;
 	}
 
-	public void setMain(Main main) {
+	public void setMainWin(MainWin main) {
 		this.main = main;
 	}
 
-	public SearchBox(Main main) {
+	public SearchBox(MainWin main) {
 		super();
 		this.main = main;
 		addActionListener(this);
@@ -62,7 +62,7 @@ public class SearchBox extends JTextField implements ActionListener, DocumentLis
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		File file = main.getjList().getSelectedValue();
+		File file = main.getSearchList().getSelectedValue();
 		try {
 			Runtime.getRuntime().exec("cmd /c start " + file.getAbsolutePath());
 		} catch (IOException e1) {
@@ -76,8 +76,8 @@ public class SearchBox extends JTextField implements ActionListener, DocumentLis
 			offset = offset < 0 ? 0 : offset;
 			PageModel<File> pageModel = searchService.search(key, offset, 10);
 			if (pageModel.getTotal() > 0 && CollectionUtils.isNotEmpty(pageModel.getDatas())) {
-				main.getjList().setListData(pageModel.getDatas().toArray(new File[pageModel.getDatas().size()]));
-				main.getjList().setSelectedIndex(0);
+				main.getSearchList().setListData(pageModel.getDatas().toArray(new File[pageModel.getDatas().size()]));
+				main.getSearchList().setSelectedIndex(0);
 			}
 		}
 	}
@@ -97,9 +97,9 @@ public class SearchBox extends JTextField implements ActionListener, DocumentLis
 	@Override
 	public void keyReleased(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_UP) {
-			main.getjList().setSelectedIndex(main.getjList().getSelectedIndex() - 1);
+			main.getSearchList().setSelectedIndex(main.getSearchList().getSelectedIndex() - 1);
 		} else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-			main.getjList().setSelectedIndex(main.getjList().getSelectedIndex() + 1);
+			main.getSearchList().setSelectedIndex(main.getSearchList().getSelectedIndex() + 1);
 		} else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
 			offset -= 10;
 			textChange();

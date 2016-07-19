@@ -18,10 +18,10 @@ import java.awt.event.MouseEvent;
  *
  */
 public class SysTray extends MouseAdapter implements ActionListener {
-	private Main main;
+	private MainWin main;
 	private SystemTray systemTray = SystemTray.getSystemTray();
 	private Image image = Toolkit.getDefaultToolkit()
-			.getImage(Main.class.getClassLoader().getResource("assets/img/tray_icon.png"));
+			.getImage(MainWin.class.getClassLoader().getResource("assets/img/tray_icon.png"));
 
 	private PopupMenu trayMenu = new PopupMenu();
 	private MenuItem setItem = new MenuItem("设置");
@@ -30,10 +30,14 @@ public class SysTray extends MouseAdapter implements ActionListener {
 
 	private TrayIcon trayIcon = new TrayIcon(image, "桌面搜索", trayMenu);
 
-	public SysTray(Main main) {
+	public SysTray(MainWin main) {
 		super();
 		this.main = main;
-
+		try {
+			init();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void init() throws Exception {
