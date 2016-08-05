@@ -11,6 +11,8 @@
 		<maven.compiler.compilerVersion>1.7</maven.compiler.compilerVersion>
 		<slf4j-version>1.7.5</slf4j-version>
 		<lucene.version>5.2.1</lucene.version>
+		<!-- <spring.verison>4.3.1.RELEASE</spring.verison> -->
+		<spring.verison>4.1.5.RELEASE</spring.verison>
 	</properties>
 	<distributionManagement>
 		<repository>
@@ -84,12 +86,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
-			<version>4.0.4.RELEASE</version>
-		</dependency>
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
@@ -105,16 +101,7 @@
 			<artifactId>mybatis-spring</artifactId>
 			<version>1.2.1</version>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-jdbc</artifactId>
-			<version>3.2.4.RELEASE</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
-			<version>4.0.4.RELEASE</version>
-		</dependency>
+
 
 
 		<dependency>
@@ -313,6 +300,27 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.logback-extensions</groupId>
+			<artifactId>logback-ext-spring</artifactId>
+			<version>0.1.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-websocket</artifactId>
+			<version>${spring.verison}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${spring.verison}</version>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+			<!-- <type>bundle</type> -->
 		</dependency>
 	</dependencies>
 
