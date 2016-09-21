@@ -10,6 +10,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -51,13 +52,12 @@ public class ClientUtils {
 		return null;
 	}
 
-	public static HttpResponse post(String data, String url) {
+	public static HttpResponse post(String data, String url, Header[] headers) {
 		HttpPost post = new HttpPost(url);
 		try {
 			post.setEntity(new StringEntity(data));
-			System.out.println(post.getAllHeaders().length);
-			for (Header header : post.getAllHeaders()) {
-				System.out.println(header.getName() + "===" + header.getValue());
+			if(headers!=null&&headers.length>0){
+				post.setHeaders(headers);	
 			}
 			HttpResponse response = httpClient.execute(post, context);
 			return response;
@@ -69,6 +69,9 @@ public class ClientUtils {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	public static HttpResponse post(String data, String url) {
+		return post(data, url,null);
 	}
 
 	public static void printResponse(HttpResponse response) {
@@ -91,5 +94,11 @@ public class ClientUtils {
 	public static void postAndPrint(String data, String url) {
 		printResponse(post(data, url));
 	}
+
+	public static HttpResponse get(String apiUrl) {
+		HttpGet httpGet = new HttpGet(apiUrl);
+		return request(httpGet);
+	}
+	
 
 }
