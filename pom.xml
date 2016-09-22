@@ -6,9 +6,9 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
-		<maven.compiler.compilerVersion>1.7</maven.compiler.compilerVersion>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
 		<slf4j-version>1.7.5</slf4j-version>
 		<lucene.version>5.2.1</lucene.version>
 		<!-- <spring.verison>4.3.1.RELEASE</spring.verison> -->
@@ -16,9 +16,11 @@
 	</properties>
 	<distributionManagement>
 		<repository>
-			<id>boful</id>
-			<url>http://nexus-boful.3322.org:81/content/repositories/boful/</url>
+			<id>aliyun</id>
+			<url>http://maven.aliyun.com/nexus/content/groups/public/</url>
 		</repository>
+		<!--<repository> <id>tae</id> <url>http://mvnrepo.tae.taobao.com/content/groups/public/</url> 
+			</repository> -->
 	</distributionManagement>
 	<build>
 		<plugins>
@@ -26,8 +28,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>7</source>
-					<target>7</target>
+					<source>8</source>
+					<target>8</target>
 					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
@@ -35,12 +37,20 @@
 	</build>
 	<repositories>
 		<repository>
-			<id>nexus</id>
-			<url>http://nexus-boful.3322.org:81/content/groups/public/</url>
+			<id>aliyun</id>
+			<url>http://maven.aliyun.com/nexus/content/groups/public/</url>
 		</repository>
 		<repository>
-			<id>boful</id>
-			<url>http://nexus-boful.3322.org:81/content/repositories/boful/</url>
+			<id>tae</id>
+			<url>http://mvnrepo.tae.taobao.com/content/groups/public/</url>
+		</repository>
+		<repository>
+			<id>scienjus-mvn-repo</id>
+			<url>https://raw.github.com/ScienJus/maven/snapshot/</url>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
 		</repository>
 	</repositories>
 	<dependencies>
@@ -323,10 +333,9 @@
 			<version>${spring.verison}</version>
 		</dependency>
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.17</version>
-			<!-- <type>bundle</type> -->
+			<groupId>com.scienjus</groupId>
+			<artifactId>smartqq</artifactId>
+			<version>1.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 
