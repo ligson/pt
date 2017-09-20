@@ -108,10 +108,10 @@ public class LocConvert {
 		// http://lbsyun.baidu.com/index.php?title=webapi/high-acc-ip
 		Map<String, String> params = new HashMap<>();
 		params.put("qcip", ip);
-		params.put("ak", "2d8f5d24b455d1442822a389da64a057");
+		params.put("ak", "5L3GQO19UtAtisvQ2nOP6RFE6HYsETPl");
 		params.put("qterm", pc + "");
 		HttpResponse response = ClientUtils
-				.get("http://api.map.baidu.com/highacciploc/v1?coord=bd09ll&extensions=3&ak=2d8f5d24b455d1442822a389da64a057&qcip="
+				.get("http://api.map.baidu.com/highacciploc/v1?coord=bd09ll&extensions=3&ak=5L3GQO19UtAtisvQ2nOP6RFE6HYsETPl&qcip="
 						+ ip + "&qterm=" + pc);
 		// HttpResponse response = ClientUtils.post(params,
 		// "http://api.map.baidu.com/highacciploc/v1", null);
@@ -128,15 +128,38 @@ public class LocConvert {
 		}
 		return null;
 	}
+	
+	public static IpReturnContent ipLoc2(String ip) {
+		// http://lbsyun.baidu.com/index.php?title=webapi/high-acc-ip
+		HttpResponse response = ClientUtils
+				.get("http://api.map.baidu.com/location/ip?coord=bd09ll&ak=5L3GQO19UtAtisvQ2nOP6RFE6HYsETPl&ip="
+						+ ip);
+		// HttpResponse response = ClientUtils.post(params,
+		// "http://api.map.baidu.com/highacciploc/v1", null);
+
+		try {
+			JSONObject jsonObject = JSONObject.parseObject(EntityUtils.toString(response.getEntity()));
+			System.out.println(jsonObject.toJSONString());
+			if (jsonObject.containsKey("result") && jsonObject.getJSONObject("result").getIntValue("error") == 161) {
+				return JSONObject.toJavaObject(jsonObject.getJSONObject("content"), IpReturnContent.class);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	
 
 	public static void main(String[] args) {
-		System.out.println(conv1("40.034164830066295"));
+		/*System.out.println(conv1("40.034164830066295"));
 		System.out.println(conv1("116.30733311392618"));
 		System.out.println(conv2("116:18:26"));
 		String[] bdLoc = gpsToBaidu("116.30733311392618", "40.034164830066295");
 		System.out.println(Arrays.toString(bdLoc));
-		System.out.println(saveBDMapPic(bdLoc[0], bdLoc[1]).getAbsolutePath());
-		Location location = ipLoc("111.200.254.59", true).getLocation();
+		System.out.println(saveBDMapPic(bdLoc[0], bdLoc[1]).getAbsolutePath());*/
+		Location location = ipLoc2("114.249.209.4").getLocation();
 		System.out.println(saveBDMapPic(location.getLng(),location.getLat()).getAbsolutePath());
 
 	}

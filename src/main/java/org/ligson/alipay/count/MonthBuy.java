@@ -60,7 +60,6 @@ public class MonthBuy {
 				map.put(key, new ArrayList<>());
 			}
 			map.get(key).add(buyFlow);
-			System.out.println(buyFlow.getMoney());
 		}
 
 		List<MonthFlow> monthFlows = new ArrayList<>();
@@ -76,7 +75,6 @@ public class MonthBuy {
 					inMoney += buyFlow.getMoney();
 				}
 			}
-			System.out.println(key + "====" + outMoney + "===" + inMoney);
 			monthFlows.add(new MonthFlow(Integer.parseInt(key.substring(0, 4)), Integer.parseInt(key.substring(5)),
 					outMoney, inMoney));
 		}
