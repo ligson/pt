@@ -17,13 +17,17 @@ public class ExtendTest {
     }
     public static void test(A a){
         a.name = "33333";
+        System.out.println(a.hashCode());
         a = new A();
         a.name = "222";
+        System.out.println(a.hashCode());
     }
     public static void main(String[] args) {
         A a = new A();
+        System.out.println(a.hashCode());
         a.name = "111111";
         test(a);
+        System.out.println(a.hashCode());
         System.out.println(a.name);
     }
 }

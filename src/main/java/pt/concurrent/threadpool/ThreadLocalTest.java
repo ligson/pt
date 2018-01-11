@@ -2,6 +2,8 @@ package pt.concurrent.threadpool;
 
 import pt.reflect.model.User;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 public class ThreadLocalTest {
     class Task1 implements Runnable{
         private ThreadLocal<User> threadLocal = new ThreadLocal<>();
@@ -25,6 +27,7 @@ public class ThreadLocalTest {
         }
     }
     public static void main(String[] args) {
+        ConcurrentHashMap concurrentHashMap = new ConcurrentHashMap();
 
 
     }
